@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Crawler</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+
+        #log {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: scroll;
+            background-color: #f9f9f9;
+        }
+
+        #log p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Web Crawler</h1>
+    </header>
+
+    <div class="container">
+        <button id="crawlTikiButton">Crawl Tiki Data</button>
+        <button id="crawlDiscoveryButton">Crawl PhongVu Data</button>
+        <div id="result"></div>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        document.getElementById('crawlTikiButton').addEventListener('click', async () => {
+            document.getElementById('result').innerHTML = 'Crawling Tiki...';
+            document.getElementById('log').innerHTML = '';
+            try {
+                const response = await fetch('/crawl/tiki', { method: 'POST' });
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+            }
+        });
+
+        document.getElementById('crawlDiscoveryButton').addEventListener('click', async () => {
+            document.getElementById('result').innerHTML = 'Crawling PhongVu...';
+            document.getElementById('log').innerHTML = '';
+            try {
+                const response = await fetch('/crawl/discovery', { method: 'POST' });
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+            }
+        });
+
+        socket.on('log', (data) => {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += `<p>${data.message}</p>`;
+            logDiv.scrollTop = logDiv.scrollHeight;  // Scroll to the bottom
+        });
+    </script>
+</body>
+</html>
